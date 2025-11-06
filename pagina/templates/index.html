@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Pro | Análisis de Modelo</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/css/styles.css" />
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Estilos para el componente desplegable */
+        .card-title-toggle {
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .card-title-toggle .arrow-icon {
+            transition: transform 0.3s ease-in-out;
+        }
+        .card-title-toggle.active .arrow-icon {
+            transform: rotate(180deg);
+        }
+        /* Eliminar margen inferior del título cuando está cerrado */
+        .card-title.card-title-toggle {
+            margin-bottom: 0;
+        }
+        /* Restaurar margen inferior cuando está activo (abierto) */
+        .card-title.card-title-toggle.active {
+            margin-bottom: 20px;
+        }
+        .collapsible-content {
+            display: none; /* Oculto por defecto */
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20V16"/></svg>
+            <h2>Dashboard del Modelo</h2>
+        </div>
+        <div class="sidebar-info">
+            <div class="info-item">
+                <span class="info-label">Tracking URI</span>
+                <span id="infoTracking" class="info-value">Cargando...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Run ID</span>
+                <span id="infoRunId" class="info-value">Cargando...</span>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+            <div class="grid-col">
+                <!-- SECCIÓN DE INFERENCIA DESPLEGABLE -->
+                <div class="card">
+                    <div class="card-title card-title-toggle">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                            <span>Inferencia en Tiempo Real</span>
+                        </div>
+                        <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                    <div class="collapsible-content">
+                        <p class="card-subtitle">Prueba el modelo con nuevos textos en ingles (uno por línea).</p>
+                        <textarea id="txtInputs" class="predict-textarea" rows="8" placeholder="this is a great movie!&#10;i really disliked the acting..."></textarea>
+                        <div class="predict-actions">
+                            <button id="btnPredict" class="btn">🚀 Predecir Sentimiento</button>
+                            <span id="predictStatus" class="status">Listo</span>
+                        </div>
+                        <div id="predictOutput" class="results-container"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                        Métricas Clave - Modelo LightGBM
+                    </h2>
+                    <div id="metrics-container" class="metrics-grid"></div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-4.44a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8.88a2 2 0 0 0 2-2v-8.44Z"></path><path d="M18 2h-3v7h7V5Z"></path></svg>
+                        Parámetros del Modelo
+                    </h2>
+                    <div class="table-container">
+                        <table id="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Parámetro</th>
+                                    <th>Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+               
+                <div class="card">
+                    <h2 class="card-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                        Comportamiento visual del modelo 
+                    </h2>
+                    <div class="model-visuals">
+                        <div>
+                            <h3 class="chart-title">Matriz de Confusión</h3>
+                            <p class="card-subtitle">Rendimiento del modelo en el conjunto de prueba.</p>
+                            <img src="/confusion-matrix" alt="Matriz de Confusión" width="400" height="auto"/>
+                        </div>
+                    </div>
+                </div>
+               <div class="card" id="other-models-card">
+                      <div class="card-title card-title-toggle">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                               viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 6L9 17l-5-5"></path>
+                          </svg>
+                          <span>Otros modelos usados</span>
+                        </div>
+                        <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                      </div>
+                    
+                      <div class="collapsible-content">
+                        <!-- Contenido dinámico generado por JS (métricas/params), p.ej. LogisticRegression -->
+                        <div id="other-models" class="grid-col" style="gap:20px;">
+                          <!-- Se llena por JS -->
+                        </div>
+                    
+                        <!-- ===== Figuras estáticas — LogisticRegression (modeloFinal) ===== -->
+                        <div class="card" style="margin-top:20px;">
+                          <h3 class="card-title">Comportamiento visual del modelo - Regresion Logistica</h3>
+                          <div class="model-visuals" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;">
+                            <div>
+                              <h4 class="chart-title">Matriz de Confusión (conteos)</h4>
+                              <p class="card-subtitle">Rendimiento del modelo en el conjunto de prueba.</p>
+                              <img src="/static/images/confusion_matrix_counts.png"
+                                   alt="Matriz de Confusión - LogisticRegression"
+                                   width="420" height="auto"
+                                   style="max-width:100%;border-radius:10px;border:1px solid #374151;"/>
+                            </div>
+                            <div>
+                              <h4 class="chart-title">Curva Precisión–Recall</h4>
+                              <p class="card-subtitle">Relación entre cobertura y precisión del clasificador.</p>
+                              <img src="/static/images/precision_recall_curve.png"
+                                   alt="Curva Precisión–Recall - LogisticRegression"
+                                   width="420" height="auto"
+                                   style="max-width:100%;border-radius:10px;border:1px solid #374151;"/>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- ===== /Figuras estáticas — LogisticRegression ===== -->
+                    
+                        <!-- ===== Figuras estáticas — Keras-MLP TFIDF+SVD ===== -->
+                        <div class="card" style="margin-top:20px;">
+                          <h3 class="card-title">Comportamiento visual del modelo - Red Neuronal</h3>
+                          <p class="card-subtitle">
+                            Keras MLP sobre TF-IDF bigrama + TruncatedSVD. Evaluación en TEST (matrices de confusión).
+                          </p>
+                          <div class="model-visuals" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;">
+                            <div>
+                              <h4 class="chart-title">Matriz de Confusión (conteos)</h4>
+                              <img src="/static/images/confusion_matrix_counts_test.png"
+                                   alt="Matriz de Confusión (conteos) — Keras-MLP TFIDF+SVD"
+                                   width="420" height="auto"
+                                   style="max-width:100%;border-radius:10px;border:1px solid #374151;"/>
+                            </div>
+                            <div>
+                              <h4 class="chart-title">Matriz de Confusión (normalizada)</h4>
+                              <img src="/static/images/confusion_matrix_normalized_test.png"
+                                   alt="Matriz de Confusión (normalizada) — Keras-MLP TFIDF+SVD"
+                                   width="420" height="auto"
+                                   style="max-width:100%;border-radius:10px;border:1px solid #374151;"/>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- ===== /Figuras estáticas — Keras-MLP TFIDF+SVD ===== -->
+                      </div>
+                    </div>
+                <div class="card full-width-card">
+                    <h2 class="card-title">📝 Estrategia de Preprocesamiento</h2>
+                    <p class="card-subtitle">
+                        En cuanto a la lematización, los experimentos mostraron un mejor rendimiento al no aplicarla. Aunque este proceso reduce las palabras a su raíz léxica (por ejemplo, “corriendo” → “correr”), lo cual suele ser útil en textos formales, en el contexto de Twitter resultó contraproducente. La razón principal es la pérdida de intensidad emocional: formas conjugadas o grados de adjetivos aportan una carga semántica adicional (“odiando” expresa más intensidad que “odiar”). Al lematizar, dicha diferencia se elimina, homogeneizando términos que en realidad transmiten matices distintos dentro de un tweet.
+                    </p>
+                    <p class="card-subtitle">
+                        En relación con las stopwords, se comprobó que es preferible no eliminarlas. Aunque en la práctica convencional suelen considerarse ruido por su bajo valor semántico, en textos breves y bajo un enfoque de bigramas, estas palabras aportan un contexto estructural valioso. Secuencias como “harto de” o “feliz por” dependen directamente de la presencia de stopwords. Eliminarlas rompería estos patrones, reduciendo la capacidad del modelo para capturar relaciones sutiles pero relevantes.
+                    </p>
+                    <p class="card-subtitle">
+                        Respecto a la puntuación y símbolos, los resultados mostraron que deben conservarse. A diferencia de su función puramente gramatical en textos formales, en redes sociales cumplen un rol principalmente expresivo. La repetición de signos de exclamación (“!!!”) denota entusiasmo, mientras que múltiples interrogantes (“???”) sugieren confusión. Al trabajar con bigramas, tokens como “!!!” pueden correlacionarse directamente con emociones específicas. Su eliminación supondría descartar una de las señales emocionales más evidentes en este dominio.
+                    </p>
+                    <p class="card-subtitle">
+                        En cuanto a la normalización de alargamientos, se observó que la mejor práctica es aplicarla. Palabras como “buenoooo” o “buenoo” se reducen a “bueno”, evitando que el modelo trate cada variante como un token independiente. De esta forma, se refuerza la señal estadística y se mejora la robustez del aprendizaje. Aunque se sacrifica parte del matiz expresivo (intensidad), se gana en consistencia y generalización.
+                    </p>
+                    <p class="card-subtitle">
+                        Finalmente, un resultado que puede parecer contraintuitivo fue la decisión de no mantener los emojis ni emoticonos. Si bien estos suelen transmitir directamente emociones, su eliminación obligó al modelo a basarse exclusivamente en las características textuales. Esto se reveló como una ventaja: el texto, aunque más sutil, aporta un contexto más rico y menos ambiguo. En algunos casos, los emojis pueden usarse de forma sarcástica o incluso contradictoria respecto al contenido textual, introduciendo ruido. Al omitirlos, el modelo se centró en aprender patrones lingüísticos en los bigramas, lo que derivó en un comportamiento más robusto y generalizable para este conjunto de datos en particular.
+                    </p>
+                </div>
+            </div>
+
+        <div class="card full-width-card">
+            <h2 class="card-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+                Reporte de Ablación
+            </h2>
+            <div>
+                  <h3 class="chart-title">Comparativa BaseLine — Codificación Unigrama</h3>
+                  <div class="chart-container">
+                    <canvas id="ablationChartUnigram"></canvas>
+                  </div>
+                </div>
+                
+                <div>
+                    <br>
+                  <h3 class="chart-title">Comparativa BaseLine — Codificación Bigrama</h3>
+                  <div class="chart-container">
+                    <canvas id="ablationChartBigram"></canvas>
+                  </div>
+            </div>
+            <div class="card full-width-card">
+                <h2 class="card-title">📊 Comparación TF-IDF: Unigramas vs Bigramas</h2>
+                <p class="card-subtitle">
+                    Al comparar TF-IDF con unigramas frente a TF-IDF con bigramas, los resultados muestran que los bigramas superan consistentemente a los unigramas, lo que evidencia la importancia del contexto local para interpretar el sentimiento.
+                </p>
+                <p class="card-subtitle">
+                    Esto se debe principalmente a la capacidad de los bigramas para capturar negaciones y modificadores. Un modelo basado en unigramas analiza las palabras de forma aislada: tokens como “no” y “malo” se interpretan por separado, lo que puede inducir a errores en la clasificación. En contraste, un modelo con bigramas reconoce la combinación “no malo”, cuyo significado es muy distinto —más cercano a neutral o incluso positivo— que el de “malo” en solitario.
+                </p>
+                <p class="card-subtitle">
+                    Además, los bigramas permiten incorporar un contexto de intensidad en las expresiones. Ejemplos como “muy bueno”, “nada feliz” o “un poco triste” ilustran cómo estas secuencias modifican la carga semántica de las palabras. En textos cortos, como los de Twitter, este contexto inmediato es esencial: cada palabra y cada combinación aporta información crítica para lograr una clasificación más precisa del sentimiento.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="card full-width-card">
+            <h2 class="card-title">🤝 Comparación con HuggingFace</h2>
+            <p id="comparisonSummary" class="card-subtitle">—</p>
+            <div class="results-container table-container">
+                <table id="comparisonTable">
+                    <thead>
+                        <tr>
+                            <th>Métrica</th>
+                            <th>Random Forest</th>
+                            <th>HuggingFace</th>
+                            <th>Diferencia</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <p id="comparisonTextBottom" class="card-subtitle">—</p>
+        </div>
+    </main>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
+

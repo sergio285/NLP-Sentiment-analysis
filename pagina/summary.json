@@ -1,0 +1,17 @@
+{
+  "text_top": "Al realizar la comparación de modelos de análisis de sentimientos, el objetivo principal fue desarrollar un clasificador para datos de Twitter y evaluar su rendimiento frente a un modelo de referencia State of the Art: el pipeline sentiment-analysis de Hugging Face, basado en DistilBERT ajustado sobre SST-2.\n\nEntre los modelos implementados, el mejor desempeño lo obtuvo el LightGBM Pipeline 3, entrenado con una codificación de bigramas. Este modelo puede considerarse una versión más eficiente y precisa que el Random Forest en esta tarea específica.\n\nLa métrica principal de evaluación fue el recall macro (0.83), seleccionada debido al caso de uso planteado: la detección de contenido con connotación negativa dirigido a audiencias sensibles. En este contexto, minimizar los falsos negativos es fundamental para evitar que mensajes nocivos pasen inadvertidos.\n\nFinalmente, ambos modelos fueron evaluados sobre el mismo conjunto de prueba (X_test), obteniéndose los siguientes resultados:",
+  "table": {
+    "headers": [
+      "Métrica",
+      "LightGBM (en Test de Twitter)",
+      "DistilBERT (en Validación de SST-2)"
+    ],
+    "rows": [
+      ["accuracy", "0.7834", "0.7203"],
+      ["precision_macro", "0.7590", "0.7252"],
+      ["recall_macro", "0.8304", "0.7203"],
+      ["f1_macro", "0.7931", "0.7188"]
+    ]
+  },
+  "text_bottom": "Contrario a lo que podría anticiparse, el modelo LightGBM desarrollado internamente alcanzó un rendimiento significativamente superior en todas las métricas clave. En particular, su capacidad de identificar correctamente las clases, medida mediante el recall (0.83), supera ampliamente a la obtenida por DistilBERT sobre los mismos datos (0.72), lo que representa una diferencia superior a once décimas.\n\nEste resultado se explica por la naturaleza de los datos y el ajuste del modelo. Aunque LightGBM es un enfoque clásico basado en representaciones Bag of Words —en este caso con bigramas—, fue entrenado y optimizado específicamente para el lenguaje y la estructura propios de Twitter. Por contraste, DistilBERT, como modelo basado en la arquitectura Transformer, posee gran potencia, pero su desempeño depende fuertemente de la similitud entre los datos de entrenamiento y los de inferencia.\n\nAquí se evidencia un problema recurrente en Machine Learning: la discrepancia entre dominios de datos. Mientras que LightGBM fue entrenado exclusivamente con mensajes de Twitter, DistilBERT fue ajustado sobre el conjunto SST-2 (reseñas de películas), caracterizado por un lenguaje más formal y estructurado. Al enfrentarse a la informalidad, abreviaturas y particularidades semánticas de Twitter, DistilBERT experimentó una disminución significativa en su rendimiento. Esto demuestra que un modelo especializado, incluso si es tecnológicamente más sencillo, puede superar a uno más avanzado cuando este último no está adaptado al dominio específico.\n\nEn conclusión, es posible desarrollar un modelo tradicional como LightGBM que, con un preprocesamiento adecuado, logre un rendimiento competitivo, alcanzando un recall del 83%. Sin embargo, en el contexto del caso de uso planteado —la protección de audiencias infantiles—, ese valor implica que un 17% de los tuits negativos no serían filtrados. Si bien esto representa una mejora considerable respecto a análisis anteriores, aún constituye un margen de error relevante que debe tomarse en cuenta."
+}
